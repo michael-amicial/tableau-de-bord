@@ -1,8 +1,8 @@
 {
   "tiles": [
     {
-      "title": "Tableau de bord Amicial",
-      "url": "https://claude.ai/artifact/73ZRtGooFhu6yfWgtrgtdh",
+      "title": "Tableau de bord Amicial 2026",
+      "url": "https://michael-amicial.github.io/tableau-de-bord//Tableau%20de%20bord%20Amicial.html",
       "desc": "Activité, objectifs, atterrissage, SIG, SSIAD, agences, salariés, modulation, trajets.",
       "cat": "Tableaux de bord",
       "icon": "📊",
@@ -10,21 +10,21 @@
       "visible": true
     },
     {
-      "title": "Tableau de bord directoire",
-      "url": "https://claude.ai/artifact/4Zz98nqGKJ2uP2V4HfvohC",
-      "desc": "Vue de synthèse pour le directoire.",
-      "cat": "Tableaux de bord",
-      "icon": "🧭",
-      "color": "#3e5a7f",
-      "visible": true
-    },
-    {
       "title": "Budgets 2027 Amicial",
-      "url": "https://claude.ai/artifact/Vfqb3ie9Q4egFKhWADoX1p",
+      "url": "https://michael-amicial.github.io/tableau-de-bord//Budgets%202027%20Amicial.html",
       "desc": "Construction et suivi des budgets 2027.",
       "cat": "Budgets",
       "icon": "💶",
       "color": "#568259",
+      "visible": true
+    },
+    {
+      "title": "Tableau de bord 2024 - 2026",
+      "url": "https://michael-amicial.github.io/tableau-de-bord//Tableau%20bord%20directoire.html",
+      "desc": "Vue de synthèse pour le directoire.",
+      "cat": "Tableaux de bord",
+      "icon": "🧭",
+      "color": "#3e5a7f",
       "visible": true
     },
     {
@@ -34,7 +34,7 @@
       "cat": "Analyses",
       "icon": "🧾",
       "color": "#f29559",
-      "visible": true
+      "visible": false
     },
     {
       "title": "Offre paie et comptabilité : vision mensuelle",
@@ -43,7 +43,7 @@
       "cat": "Présentations",
       "icon": "📽️",
       "color": "#8fb8bf",
-      "visible": true
+      "visible": false
     },
     {
       "title": "Situation économique Amicial 2024-2026",
@@ -52,7 +52,7 @@
       "cat": "Présentations",
       "icon": "📈",
       "color": "#8fb8bf",
-      "visible": true
+      "visible": false
     },
     {
       "title": "Tableau de bord Amicial TEST",
