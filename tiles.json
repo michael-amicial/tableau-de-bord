@@ -1,0 +1,67 @@
+{
+  "tiles": [
+    {
+      "title": "Tableau de bord Amicial",
+      "url": "https://claude.ai/artifact/73ZRtGooFhu6yfWgtrgtdh",
+      "desc": "Activité, objectifs, atterrissage, SIG, SSIAD, agences, salariés, modulation, trajets.",
+      "cat": "Tableaux de bord",
+      "icon": "📊",
+      "color": "#3e5a7f",
+      "visible": true
+    },
+    {
+      "title": "Tableau de bord directoire",
+      "url": "https://claude.ai/artifact/4Zz98nqGKJ2uP2V4HfvohC",
+      "desc": "Vue de synthèse pour le directoire.",
+      "cat": "Tableaux de bord",
+      "icon": "🧭",
+      "color": "#3e5a7f",
+      "visible": true
+    },
+    {
+      "title": "Budgets 2027 Amicial",
+      "url": "https://claude.ai/artifact/Vfqb3ie9Q4egFKhWADoX1p",
+      "desc": "Construction et suivi des budgets 2027.",
+      "cat": "Budgets",
+      "icon": "💶",
+      "color": "#568259",
+      "visible": true
+    },
+    {
+      "title": "Audit et devis paie compta",
+      "url": "https://claude.ai/artifact/Gf37cBpAEZ1MbMaFZQcygy",
+      "desc": "Audit et comparaison des devis paie / comptabilité.",
+      "cat": "Analyses",
+      "icon": "🧾",
+      "color": "#f29559",
+      "visible": true
+    },
+    {
+      "title": "Offre paie et comptabilité : vision mensuelle",
+      "url": "https://claude.ai/artifact/FKQsbN48oQHhUoqPVzykv1",
+      "desc": "Présentation de l'offre paie et comptabilité.",
+      "cat": "Présentations",
+      "icon": "📽️",
+      "color": "#8fb8bf",
+      "visible": true
+    },
+    {
+      "title": "Situation économique Amicial 2024-2026",
+      "url": "https://claude.ai/artifact/G75ci5J9NfV4TNoXAUfYzW",
+      "desc": "Présentation de la situation économique 2024-2026.",
+      "cat": "Présentations",
+      "icon": "📈",
+      "color": "#8fb8bf",
+      "visible": true
+    },
+    {
+      "title": "Tableau de bord Amicial TEST",
+      "url": "https://claude.ai/artifact/TWygea4gVdVLbWYazKJLpE",
+      "desc": "Version de test du tableau de bord.",
+      "cat": "Tableaux de bord",
+      "icon": "🧪",
+      "color": "#b3a77f",
+      "visible": false
+    }
+  ]
+}
