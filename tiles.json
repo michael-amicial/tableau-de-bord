@@ -62,6 +62,15 @@
       "icon": "🧪",
       "color": "#b3a77f",
       "visible": false
+    },
+    {
+      "title": "Tableau Subventions & Fonds dédiés",
+      "url": "https://michael-amicial.github.io/tableau-de-bord//Suivi subventions et fonds dédiés.html",
+      "desc": "Suivi des subventions, date, montant, encaissement",
+      "cat": "Tableaux de bord",
+      "icon": "🔗",
+      "color": "#f29559",
+      "visible": true
     }
   ]
 }
