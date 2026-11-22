@@ -464,7 +464,6 @@ details.acc{border:none;border-radius:var(--r-sm);box-shadow:var(--sh)}
     <div class="card"><h3>Évolution des heures de trajet</h3><div class="note">Comparaison mois par mois, une courbe par année</div><div class="chart" id="cTrH"></div></div>
     <div class="card"><h3>Temps de trajet rapporté aux heures vendues</h3><div class="note">Heures de trajet ÷ heures vendues du mois, en %</div><div class="chart" id="cTrR"></div></div>
     <div class="card"><h3 id="trAgT">Temps de trajet en % des heures vendues</h3><div class="note">Trié du plus élevé au plus faible — cliquez pour filtrer (hors « Non renseigné » et entités à très faible activité)</div><div class="chart" id="cTrAg"></div></div>
-    <div class="card"><h3>Montant de la rubrique par heure vendue</h3><div class="note">Montant temps de trajet ÷ heures vendues (€/h vendue)</div><div class="chart" id="cTrAgE"></div></div>
   </div>
   <div class="card" style="margin-bottom:16px"><h3 id="trAgT2">Détail par agence</h3><div class="note">Cliquez sur une ligne pour filtrer (agence puis secteurs).</div><div class="tbl-wrap" id="tTrAg"></div></div>
   <div class="card"><h3>Temps de trajet par salarié</h3>
@@ -525,7 +524,7 @@ details.acc{border:none;border-radius:var(--r-sm);box-shadow:var(--sh)}
     <p><b>Chiffre d'affaires</b> — CA et prix moyen par heure par type de caisse ; détail par caisse et par secteur.</p>
     <p><b>Salariés</b> — taux horaire brut et coût chargé (distribution, par profession) ; tableau par salarié, en période cumulée ou un mois par ligne. Cliquer sur un salarié ouvre sa fiche mensuelle (paie, modulation, heures excédentaires et perdues, trajet, productivité du secteur). Sources : onglet « masse salariale AAD par salarié » pour l'aide ; pour les SSIAD, feuille « masse salariale totale » (et données_vitry pour le SSIAD de Vitry), intervenants de soin (aides-soignants, infirmiers, AMP, AES, ergothérapeutes et ASG) dans les indicateurs ; l'encadrement, l'administratif, le support et le paramédical hors soin (coordinateurs, direction, accueil, comptabilité, RH, psychologues, diététiciens…) figurent dans la liste avec la profession « Hors intervention — … » et une tuile dédiée, mais sont exclus des indicateurs ; leurs charges patronales sont plus élevées (≈ 45 à 55 % du brut, contre ≈ 29 % pour l'aide).</p>
     <p><b>Modulation</b> — soldes cumulés positifs et négatifs, heures excédentaires et perdues, rapportés aux heures vendues cumulées depuis janvier ; tableau par agence et focus par salarié. Les heures excédentaires et perdues viennent de la paie (feuilles « hrs exed » et « hrs perdu » du fichier données_power_bi) (2024 à 2026 ; les heures perdues sont surtout passées en septembre et en décembre, lors des régularisations de fin de période) ; les colonnes correspondantes de l'onglet modulation ne sont pas utilisées.</p>
-    <p><b>Temps de trajet</b> — heures et montant de la rubrique trajet, en % des heures vendues, par agence et par salarié.</p>
+    <p><b>Temps de trajet</b> — heures de trajet (base de la rubrique), en % des heures vendues et des heures payées, par agence et par salarié ; coût estimé = heures de trajet × coût horaire chargé (le montant de la rubrique, erroné dans la source, n'est pas utilisé).</p>
     </div></details>
 
   <details class="acc"><summary>3. Le paramétrage (onglet ⚙ Paramètres)</summary>
@@ -909,14 +908,14 @@ function rSyn(){
   h+=kpi('Masse salariale chargée',fK(ms),`<b>${fP(dv(ms,T.ca))}</b> du CA · ${fEh(dv(ms,T.hv))} vendue`,d(t=>t.br+t.ch),true);
   h+=kpi('Taux horaire brut',fEh(dv(T.br,T.hp)),'Brut ÷ heures payées',d(t=>dv(t.br,t.hp)),true,'',OB.tx);
   h+=kpi('Coût horaire chargé',fEh(coutH),'(Brut + charges) ÷ heures payées',d(t=>dv(t.br+t.ch,t.hp)),true);
-  h+=kpi('Marge sur masse salariale',fK(T.ca-ms),`<b>${fP(dv(T.ca-ms,T.ca))}</b> du CA · ${fEh(dv(T.ca-ms,T.hv))} vendue`,d(t=>t.ca-t.br-t.ch));
+  h+=kpi('Marge sur masse salariale',fK(T.ca-ms),`= CA − (brut + charges patronales des intervenants) : ce qui reste du chiffre d'affaires pour couvrir l'encadrement, les déplacements, les locaux, les frais de siège et les autres charges · <b>${fP(dv(T.ca-ms,T.ca))}</b> du CA · ${fEh(dv(T.ca-ms,T.hv))} vendue`,d(t=>t.ca-t.br-t.ch));
   { const TR=aggTrj(S.years), TT=totT(TR), PT=py?totT(aggTrj(py,cmpMonths())):null;
     h+=kpi('Temps de trajet / h vendues',fP(dv(TT.h,T.hv)),`${fH(TT.h)} de trajet · ${fN(dv(TT.h,T.hv)*100)} h pour 100 h vendues`,PT&&P?dv(TT.h,T.hv)-dv(PT.h,P.hv):null,true,' pt',OB.tr); }
   if(refYm>=0){ const he=HEC[refYm]||0, hl=HLC[refYm]||0;
-    { const hs=heSoin(refYm); h+=kpi('Heures excédentaires cumulées',fH(he),`Fin ${ymL(refYm)} · <b>${fP(dv(he,hvRef))}</b> des h vendues cumulées · dont soin : <b>${fH(hs)}</b> · ≈ ${fK(he*coutH)} valorisés`); }
-    h+=kpi('Heures perdues cumulées',fH(hl),`Fin ${ymL(refYm)} · <b>${fP(dv(hl,hvRef))}</b> des h vendues cumulées · ≈ ${fK(hl*coutH)} valorisés`); }
-  if(ref){ h+=kpi('Modulation + cumulée',fH(ref.cp),`<b>${fP(dv(ref.cp,hvRef))}</b> des h vendues cumulées à fin ${ymL(refYm)} · ≈ ${fK(ref.cp*coutH)} valorisés`,null,false,'',OB.mp);
-           h+=kpi('Modulation − cumulée',fH(ref.cn),`<b>${fP(dv(-ref.cn,hvRef))}</b> des h vendues cumulées à fin ${ymL(refYm)} · ≈ ${fK(ref.cn*coutH)} valorisés`,null,false,'',OB.mn); }
+    { const hs=heSoin(refYm); h+=kpi('Heures excédentaires cumulées',fH(he),`Fin ${ymL(refYm)} · <b>${fP(dv(he,hvRef))}</b> des h vendues cumulées · dont soin : <b>${fH(hs)}</b> · ≈ ${fK(he*coutH)} au coût horaire chargé`); }
+    h+=kpi('Heures perdues cumulées',fH(hl),`Fin ${ymL(refYm)} · <b>${fP(dv(hl,hvRef))}</b> des h vendues cumulées · ≈ ${fK(hl*dv(T.ca,T.hv))} au prix de vente moyen`); }
+  if(ref){ h+=kpi('Modulation + cumulée',fH(ref.cp),`<b>${fP(dv(ref.cp,hvRef))}</b> des h vendues cumulées à fin ${ymL(refYm)} · ≈ ${fK(ref.cp*coutH)} au coût horaire chargé`,null,false,'',OB.mp);
+           h+=kpi('Modulation − cumulée',fH(ref.cn),`<b>${fP(dv(-ref.cn,hvRef))}</b> des h vendues cumulées à fin ${ymL(refYm)} · ≈ ${fK(-ref.cn*dv(T.ca,T.hv))} au prix de vente moyen`,null,false,'',OB.mn); }
   if((!S.years.size||S.years.has(2026))&&!S.secs.size&&!S.sas.size&&budOK()){ const O=objData(), Z=objAgg(O,budAgs(),true); if(Z.ob>0) h=kpi('Objectif activité 2026 à date',fP(dv(Z.hv,Z.ob)),`Réalisé ${fH(Z.hv)} / objectif ${fH(Z.ob)} · ${fP(dv(Z.hv,Z.obAll))} de l'objectif annuel`)+h; }
   document.getElementById('synK').innerHTML=h; rCmp();
   // YoY curves
@@ -1160,19 +1159,17 @@ function salDetail(k){
 /* ---------- MODULATION ---------- */
 function rMod(){
   const MR=modRows(S.years), mby=modByYm(MR), ks=Object.keys(mby).map(Number).filter(k=>mby[k].n>0).sort((a,b)=>a-b);
-  const A=aggAct(S.years), T=tot(A), coutH=dv(T.br+T.ch,T.hp);
+  const A=aggAct(S.years), T=tot(A), coutH=dv(T.br+T.ch,T.hp), pvm=dv(T.ca,T.hv); // valorisation : + et heures excédentaires au coût horaire chargé ; − et heures perdues au prix de vente moyen
   if(!ks.length){ document.getElementById('modK').innerHTML='<div class="empty">Aucune donnée de modulation pour cette sélection (la modulation couvre janvier à septembre).</div>'; ['cMod','cEc','tModAg','tModP','tModN','tModHE','tModHP'].forEach(id=>empty(document.getElementById(id))); return; }
   const ref=ks[ks.length-1], R=mby[ref], HVC=hvC(), CAC=caC(), HEC=heC(), HLC=hlC(), hvR=HVC[ref], caR=CAC[ref];
   const fl={hex:HEC[ref]||0,hpd:HLC[ref]||0}; const inY=y=>YMY[y]===YMY[ref]&&y<=ref; const MRY=D.mod.filter(r=>inY(r[3])&&okAS(r[1],r[2])&&(S.sal<0||r[0]===S.sal)), HPR=D.hpd.filter(r=>inY(r[3])&&okAS(r[1],r[2])&&(S.sal<0||r[0]===S.sal)); const nHE=new Set(MRY.filter(r=>r[5]>0).map(r=>r[0])).size, nHP=new Set(HPR.map(r=>r[0])).size;
   // N-1 same month
   const pRef=YM.indexOf((YMY[ref]-1)+'-'+String(YMM[ref]).padStart(2,'0')); const PR=pRef>=0?modByYm(D.mod.filter(r=>r[3]===pRef&&okAS(r[1],r[2])&&(S.sal<0||r[0]===S.sal)))[pRef]:null;
-  let h=`<div class="kpi" style="grid-column:1/-1;padding:8px 13px"><span class="r">Mois de référence (stock de fin de mois) : <b>${ymLab(ref)}</b> — les soldes de modulation ne s'additionnent pas d'un mois sur l'autre ; ils sont rapportés aux heures vendues cumulées depuis janvier (${fH(hvR)}). Valorisation au coût horaire chargé de la sélection (${fEh(coutH)}).</span></div>`;
-  h+=kpi('Modulation positive cumulée',`<span class="pos">${fH(R.cp)}</span>`,`<b>${fP(dv(R.cp,hvR))}</b> des h vendues cumulées · ${fN(R.np)} salariés · ≈ ${fK(R.cp*coutH)} (${fP(dv(R.cp*coutH,caR))} du CA cumulé)`,PR?evo(R.cp,PR.cp):null,true);
-  h+=kpi('Modulation négative cumulée',`<span class="neg">${fH(R.cn)}</span>`,`<b>${fP(dv(-R.cn,hvR))}</b> des h vendues cumulées · ${fN(R.nn)} salariés · ≈ ${fK(R.cn*coutH)} (${fP(dv(-R.cn*coutH,caR))} du CA cumulé)`,PR?evo(-R.cn,-PR.cn):null,true);
-  h+=kpi('Solde net',fH(R.cp+R.cn),`${fP(dv(R.cp+R.cn,hvR))} des h vendues cumulées`);
-  h+=kpi('Cumul + moyen par salarié concerné',fH(dv(R.cp,R.np)),`Cumul − moyen : ${fH(dv(R.cn,R.nn))}`);
-  h+=kpi('Heures excédentaires cumulées',fH(fl.hex),`Janvier → ${ymL(ref)} · <b>${fP(dv(fl.hex,hvR))}</b> des h vendues cumulées · dont soin : <b>${fH(heSoin(ref))}</b> · ${fN(nHE)} salariés · ≈ ${fK(fl.hex*coutH)} (${fP(dv(fl.hex*coutH,caR))} du CA cumulé)`);
-  h+=kpi('Heures perdues cumulées',fH(fl.hpd),`Janvier → ${ymL(ref)} · <b>${fP(dv(fl.hpd,hvR))}</b> des h vendues cumulées · ${fN(nHP)} salariés · ≈ ${fK(fl.hpd*coutH)} (${fP(dv(fl.hpd*coutH,caR))} du CA cumulé)`);
+  let h=`<div class="kpi" style="grid-column:1/-1;padding:8px 13px"><span class="r">Mois de référence (stock de fin de mois) : <b>${ymLab(ref)}</b> — les soldes de modulation ne s'additionnent pas d'un mois sur l'autre ; ils sont rapportés aux heures vendues cumulées depuis janvier (${fH(hvR)}). Valorisation : modulation positive et heures excédentaires au coût horaire chargé (${fEh(coutH)} = (brut + charges) ÷ heures payées) ; modulation négative et heures perdues au prix de vente moyen (${fEh(pvm)} = CA ÷ heures vendues), soit le CA non facturé sur des heures payées. Les soldes positifs et négatifs ne se compensent pas.</span></div>`;
+  h+=kpi('Modulation positive cumulée',`<span class="pos">${fH(R.cp)}</span>`,`<b>${fP(dv(R.cp,hvR))}</b> des h vendues cumulées · ${fN(R.np)} salariés · ≈ ${fK(R.cp*coutH)} au coût chargé (${fP(dv(R.cp*coutH,caR))} du CA cumulé)`,PR?evo(R.cp,PR.cp):null,true);
+  h+=kpi('Modulation négative cumulée',`<span class="neg">${fH(R.cn)}</span>`,`<b>${fP(dv(-R.cn,hvR))}</b> des h vendues cumulées · ${fN(R.nn)} salariés · ≈ ${fK(-R.cn*pvm)} au prix de vente (${fP(dv(-R.cn*pvm,caR))} du CA cumulé)`,PR?evo(-R.cn,-PR.cn):null,true);
+  h+=kpi('Heures excédentaires cumulées',fH(fl.hex),`Janvier → ${ymL(ref)} · <b>${fP(dv(fl.hex,hvR))}</b> des h vendues cumulées · dont soin : <b>${fH(heSoin(ref))}</b> · ${fN(nHE)} salariés · ≈ ${fK(fl.hex*coutH)} au coût chargé (${fP(dv(fl.hex*coutH,caR))} du CA cumulé)`);
+  h+=kpi('Heures perdues cumulées',fH(fl.hpd),`Janvier → ${ymL(ref)} · <b>${fP(dv(fl.hpd,hvR))}</b> des h vendues cumulées · ${fN(nHP)} salariés · ≈ ${fK(fl.hpd*pvm)} au prix de vente (${fP(dv(fl.hpd*pvm,caR))} du CA cumulé)`);
   document.getElementById('modK').innerHTML=h;
   const L=ks.map(ymLab), pos=css('--pos'), neg=css('--neg');
   const ex=i=>{const k=ks[i];return `<div class="row"><span>H vendues cumulées</span><span>${fH(HVC[k])}</span></div><div class="row"><span>Modul. + / HV cumulées</span><span>${fP(dv(mby[k].cp,HVC[k]))}</span></div><div class="row"><span>Modul. − / HV cumulées</span><span>${fP(dv(-mby[k].cn,HVC[k]))}</span></div>`};
@@ -1184,9 +1181,9 @@ function rMod(){
   const hv={}; for(const r of D.act) if(okAS(r[0],r[1])&&inY(r[2])){const k=bySec?r[1]:r[0]; hv[k]=(hv[k]||0)+r[3];} const hvP=hv;
   const ini=k=>g[k]||(g[k]={k,cp:0,cn:0,np:0,nn:0,n:0,he:0,hl:0});
   for(const r of MRY){ if(r[5]) ini(bySec?r[2]:r[1]).he+=r[5]; } for(const r of HPR){ ini(bySec?r[2]:r[1]).hl+=r[4]; }
-  const cols=[{h:bySec?'Secteur':'Agence',v:r=>names[r.k],t:1},{h:'Salariés suivis',v:r=>r.n,f:fN},{h:'Cumul +',v:r=>r.cp,f:fN,cls:()=>'pos'},{h:'Nb en +',v:r=>r.np,f:fN},{h:'Cumul + / HV cumulées',v:r=>dv(r.cp,hv[r.k]),f:fP},{h:'Cumul −',v:r=>r.cn,f:fN,cls:()=>'neg'},{h:'Nb en −',v:r=>r.nn,f:fN},{h:'Cumul − / HV cumulées',v:r=>dv(-r.cn,hv[r.k]),f:fP},{h:'Solde',v:r=>r.cp+r.cn,f:fN},{h:'Valorisation + (€)',v:r=>r.cp*coutH,f:fN},{h:'H excéd. cumulées',v:r=>r.he,f:fN},{h:'H excéd. / HV cumulées',v:r=>dv(r.he,hvP[r.k]),f:fP},{h:'H perdues cumulées',v:r=>r.hl,f:fN},{h:'H perdues / HV cumulées',v:r=>dv(r.hl,hvP[r.k]),f:fP}];
+  const cols=[{h:bySec?'Secteur':'Agence',v:r=>names[r.k],t:1},{h:'Salariés suivis',v:r=>r.n,f:fN},{h:'Cumul +',v:r=>r.cp,f:fN,cls:()=>'pos'},{h:'Nb en +',v:r=>r.np,f:fN},{h:'Cumul + / HV cumulées',v:r=>dv(r.cp,hv[r.k]),f:fP},{h:'Cumul −',v:r=>r.cn,f:fN,cls:()=>'neg'},{h:'Nb en −',v:r=>r.nn,f:fN},{h:'Cumul − / HV cumulées',v:r=>dv(-r.cn,hv[r.k]),f:fP},{h:'Valorisation + (€)',tip:'Cumul + × coût horaire chargé',v:r=>r.cp*coutH,f:fN},{h:'Valorisation − (€)',tip:'Cumul − × prix de vente moyen',v:r=>-r.cn*pvm,f:fN},{h:'H excéd. cumulées',v:r=>r.he,f:fN},{h:'H excéd. / HV cumulées',v:r=>dv(r.he,hvP[r.k]),f:fP},{h:'H perdues cumulées',v:r=>r.hl,f:fN},{h:'H perdues / HV cumulées',v:r=>dv(r.hl,hvP[r.k]),f:fP}];
   const el=document.getElementById('tModAg'); if(el._mode!==bySec){el._sort=null;el._mode=bySec}
-  table(el,cols,Object.values(g),{sort:2,foot:{[cols[0].h]:'Total','Salariés suivis':R.n,'Cumul +':R.cp,'Nb en +':R.np,'Cumul + / HV cumulées':dv(R.cp,hvR),'Cumul −':R.cn,'Nb en −':R.nn,'Cumul − / HV cumulées':dv(-R.cn,hvR),'Solde':R.cp+R.cn,'Valorisation + (€)':R.cp*coutH,'H excéd. cumulées':fl.hex,'H excéd. / HV cumulées':dv(fl.hex,T.hv),'H perdues cumulées':fl.hpd,'H perdues / HV cumulées':dv(fl.hpd,T.hv)},click:r=>drill(r.k)});
+  table(el,cols,Object.values(g),{sort:2,foot:{[cols[0].h]:'Total','Salariés suivis':R.n,'Cumul +':R.cp,'Nb en +':R.np,'Cumul + / HV cumulées':dv(R.cp,hvR),'Cumul −':R.cn,'Nb en −':R.nn,'Cumul − / HV cumulées':dv(-R.cn,hvR),'Valorisation + (€)':R.cp*coutH,'Valorisation − (€)':-R.cn*pvm,'H excéd. cumulées':fl.hex,'H excéd. / HV cumulées':dv(fl.hex,T.hv),'H perdues cumulées':fl.hpd,'H perdues / HV cumulées':dv(fl.hpd,T.hv)},click:r=>drill(r.k)});
   const refRows=MR.filter(r=>r[3]===ref);
   const sc=(lab,idx,cls)=>[{h:'Salarié',v:r=>SAL[r[0]],t:1},{h:'Agence',v:r=>AG[r[1]],t:1},{h:'Secteur',v:r=>SEC[r[2]],t:1},{h:lab,v:r=>r[idx],f:fR,cls:()=>cls},{h:'Potentiel (h)',v:r=>r[10],f:fR}];
   const pT=document.getElementById('tModP'), nT=document.getElementById('tModN');
@@ -1211,8 +1208,6 @@ function rTrj(){
   h+=kpi('Heures de trajet',fH(TT.h),`${fN(dv(TT.h,Object.keys(TR).length))} h / mois en moyenne`,ev(TT.h,PT&&PT.h),true);
   h+=kpi('Temps de trajet / h vendues',fP(dv(TT.h,T.hv)),`<b>${fR(dv(TT.h,T.hv)*100)} h</b> de trajet pour 100 h vendues`,dd((a,b)=>dv(a.h,b.hv)),true,' pt');
   h+=kpi('Trajet / heures payées AAD',fP(dv(TT.h,hpS)),`Heures payées AAD : ${fH(hpS)}`);
-  h+=kpi('Montant rubrique trajet',fE(TT.e),`<b>${fP(dv(TT.e,T.ca))}</b> du CA · ${fEh(dv(TT.e,T.hv))} vendue`,ev(TT.e,PT&&PT.e),true);
-  h+=kpi('Montant par heure de trajet',fEh(dv(TT.e,TT.h)),'Montant ÷ base de la rubrique');
   h+=kpi('Coût chargé estimé du trajet',fK(TT.h*dv(T.br+T.ch,T.hp)),`Heures de trajet × coût horaire chargé (${fEh(dv(T.br+T.ch,T.hp))}) · <b>${fP(dv(TT.h*dv(T.br+T.ch,T.hp),T.ca))}</b> du CA`);
   h+=kpi('Salariés concernés',fN(nS.size),`${fN(dv(TT.h,nS.size))} h de trajet par salarié sur la période`);
   document.getElementById('trjK').innerHTML=h;
@@ -1230,11 +1225,10 @@ function rTrj(){
   document.getElementById('trAgT2').textContent='Détail par '+(bySec?'secteur — '+AG[S.ag]:'agence');
   const wv=rows.filter(r=>r.hv>=0.005*T.hv&&r.nm!=='Non renseigné');
   hbar(document.getElementById('cTrAg'),wv.map(r=>({l:r.nm,v:dv(r.h,r.hv),k:r.k,c:col[0],tip:`<div class="row"><span>H trajet</span><span>${fH(r.h)}</span></div><div class="row"><span>H vendues</span><span>${fH(r.hv)}</span></div>`})).sort((a,b)=>b.v-a.v),fP,{ref:dv(TT.h,T.hv),name:'Trajet / h vendues',click:d=>drill(d.k)});
-  hbar(document.getElementById('cTrAgE'),wv.map(r=>({l:r.nm,v:dv(r.e,r.hv),k:r.k,c:col[2]})).sort((a,b)=>b.v-a.v),v=>isFinite(v)?nf2.format(v)+' €':'–',{ref:dv(TT.e,T.hv),name:'€ par h vendue',click:d=>drill(d.k)});
   const cols=[{h:bySec?'Secteur':'Agence',v:r=>r.nm,t:1},{h:'Salariés',v:r=>r.n.size,f:fN},{h:'H trajet',v:r=>r.h,f:fN},{h:'H vendues',v:r=>r.hv,f:fN},{h:'Trajet / HV',v:r=>dv(r.h,r.hv),f:fP},{h:'H trajet / 100 h vendues',v:r=>dv(r.h,r.hv)*100,f:fR},
-    {h:'Montant (€)',v:r=>r.e,f:fN},{h:'Montant / CA',v:r=>dv(r.e,r.ca),f:v=>isFinite(v)?nf2.format(v*100)+' %':'–'},{h:'€ / h vendue',v:r=>dv(r.e,r.hv),f:fR},{h:'H trajet / salarié',v:r=>dv(r.h,r.n.size),f:fR}];
+    {h:'H trajet / salarié',v:r=>dv(r.h,r.n.size),f:fR}];
   const el=document.getElementById('tTrAg'); if(el._mode!==bySec){el._sort=null;el._mode=bySec}
-  table(el,cols,rows,{sort:4,foot:{[cols[0].h]:'Total','Salariés':nS.size,'H trajet':TT.h,'H vendues':T.hv,'Trajet / HV':dv(TT.h,T.hv),'H trajet / 100 h vendues':dv(TT.h,T.hv)*100,'Montant (€)':TT.e,'Montant / CA':dv(TT.e,T.ca),'€ / h vendue':dv(TT.e,T.hv),'H trajet / salarié':dv(TT.h,nS.size)},click:r=>drill(r.k)});
+  table(el,cols,rows,{sort:4,foot:{[cols[0].h]:'Total','Salariés':nS.size,'H trajet':TT.h,'H vendues':T.hv,'Trajet / HV':dv(TT.h,T.hv),'H trajet / 100 h vendues':dv(TT.h,T.hv)*100,'H trajet / salarié':dv(TT.h,nS.size)},click:r=>drill(r.k)});
   // by salarié
   const bs={}; for(const r of D.trj){ if(!okAS(r[1],r[2])||!okP(r[3],S.years)||(S.sal>=0&&r[0]!==S.sal)) continue; const o=bs[r[0]]||(bs[r[0]]={k:r[0],ag:new Set(),sec:new Set(),h:0,e:0,ms:new Set(),hp:0}); o.ag.add(r[1]);o.sec.add(r[2]);o.h+=r[4];o.e+=r[5];o.ms.add(r[3]); }
   for(const r of D.sal){ const o=bs[r[0]]; if(o&&okAS(r[1],r[2])&&okP(r[4],S.years)) o.hp+=r[5]; }
@@ -1244,7 +1238,7 @@ function drawTrSal(){
   const q=document.getElementById('trSearch').value.trim().toLowerCase(); const rows=q?trCache.filter(o=>SAL[o.k].toLowerCase().includes(q)):trCache;
   document.getElementById('trCount').textContent=`${nf0.format(rows.length)} salarié(s)${rows.length>300?' — 300 premiers affichés selon le tri':''}`;
   const cols=[{h:'Salarié',v:r=>SAL[r.k],t:1},{h:'Agence',v:r=>[...r.ag].map(i=>AG[i]).join(', '),t:1},{h:'Secteur',v:r=>[...r.sec].map(i=>SEC[i]).join(', '),t:1},{h:'Mois',v:r=>r.ms.size,f:fN},
-    {h:'H trajet',v:r=>r.h,f:fR},{h:'H trajet / mois',v:r=>dv(r.h,r.ms.size),f:fR},{h:'Montant (€)',v:r=>r.e,f:fR},{h:'H payées',v:r=>r.hp,f:fN},{h:'Trajet / h payées',v:r=>dv(r.h,r.hp),f:fP}];
+    {h:'H trajet',v:r=>r.h,f:fR},{h:'H trajet / mois',v:r=>dv(r.h,r.ms.size),f:fR},{h:'H payées',v:r=>r.hp,f:fN},{h:'Trajet / h payées',v:r=>dv(r.h,r.hp),f:fP}];
   table(document.getElementById('tTrSal'),cols,rows,{sort:4,limit:300,click:r=>{S.sal=r.k;syncUI();setTab('sal')}});
 }
 
