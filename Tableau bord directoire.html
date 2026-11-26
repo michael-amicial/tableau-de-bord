@@ -325,8 +325,8 @@ details.acc{border:none;border-radius:var(--r-sm);box-shadow:var(--sh)}
 </header>
 <div class="filters">
   <div class="f"><label>Période</label><div class="info">Finances : année complète · Activité : janvier – octobre</div></div>
-  <div class="f"><label>Activité (soldes de gestion)</label><div class="chips" id="fPole">
-    <span class="chip on" data-p="total">Total</span><span class="chip" data-p="aide">Aide</span><span class="chip" data-p="soin">Soin</span><span class="chip" data-p="mand">Mandataire</span><span class="chip" data-p="siege">Siège</span><span class="chip" data-p="vitry">dont Vitry</span></div></div>
+  <div class="f"><label>Activité</label><div class="chips" id="fPole">
+    <span class="chip on" data-p="total">Total</span><span class="chip" data-p="aide">Aide</span><span class="chip" data-p="soin">Soin</span><span class="chip" data-p="mand">Mandataire</span><span class="chip" data-p="siege">Siège</span></div></div>
   <div class="f"><label>Agences</label><div class="chips" id="fAg"></div></div>
 </div>
 <nav class="tabs" id="tabs">
@@ -424,24 +424,27 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const S=k=>CA.sig.find(r=>r.cle===k)||{}, A=k=>CA.aide.find(r=>r.cle===k)||{};
 const cls=(v,hi)=>!ok(v)||Math.abs(v)<1e-9?'neutral':((v>0)===!!hi?'up':'down');
 let POLE='total';
+const FILT=()=>!!AGSEL||POLE!=='total';
+const PLAB={total:'Toutes activités',aide:'Aide à domicile',soin:'Soins (SSIAD et ESA)',mand:'Mandataire',siege:'Siège'};
+const polOK=k=>POLE==='total'||POLE===k;
 
 function kpi(l,v,r,d){return `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div>${r?`<div class="r">${r}</div>`:''}${d||''}</div>`;}
 function dl(v,f,hi,txt){return ok(v)?`<div class="d ${cls(v,hi)}">${Math.abs(v)<1e-9?'':v>0?'▲ ':'▼ '}${F[f](v)} ${txt}</div>`:'';}
 function rSyn(){
   const rn=S('total_rn'),ca=S('total_ca'),hv=A('hv'),pr=A('prix'),tc=A('txc'),tb=A('txb'),ps=A('ps'),psr=A('psr'),pse=A('pse'),mp=A('mpr'),mn=A('mnr');
-  if(AGSEL){document.getElementById('synMsg').innerHTML=`<b>Sélection : ${[...AGSEL].join(', ')}.</b> L’atterrissage 2026 prévoit un résultat net de <b>${F.k(rn.a2026)}</b>`+` pour des produits de <b>${F.M(ca.a2026)}</b>. `+(ok(rn.ecart_budget)?`Écart au budget : <b>${F.kd(rn.ecart_budget)}</b> (budget ${F.k(rn.b2026)}${AGSEL.has('94 Vitry')?', Vitry non budgétée':''}). `:'Pas de budget initial. ')+(ok(rn.evol_2025)?`Évolution sur 2025 : ${F.kd(rn.evol_2025)} (2025 : ${F.k(rn.a2025)}, exploitation à périmètre constant${AGSEL.has('94 Vitry')?', Vitry absente en 2025':''}).`:'Pas de réel 2025.')+(ok(hv.y2026)?` En aide à domicile, de janvier à octobre, les heures vendues évoluent de <b>${F.rel(hv.evol_2025)}</b> sur un an (${F.rel(hv.ecart_budget)} par rapport à l’objectif) ; prix moyen ${F.eur(pr.y2026)} (${F.eurd(pr.evol_2025)}), coût horaire chargé ${F.eur(tc.y2026)} (${F.eurd(tc.evol_2025)}), perte sèche ${F.pct(psr.y2026)} des heures vendues.`:' Pas d’activité d’aide à domicile dans la sélection.');}
+  if(FILT()){document.getElementById('synMsg').innerHTML=`<b>Sélection : ${[POLE!=='total'?PLAB[POLE]:'',AGSEL?[...AGSEL].join(', '):''].filter(x=>x).join(' · ')}.</b> L’atterrissage 2026 prévoit un résultat net de <b>${F.k(rn.a2026)}</b>`+` pour des produits de <b>${F.M(ca.a2026)}</b>. `+(ok(rn.ecart_budget)?`Écart au budget : <b>${F.kd(rn.ecart_budget)}</b> (budget ${F.k(rn.b2026)}${AGSEL&&AGSEL.has('94 Vitry')?', Vitry non budgétée':''}). `:'Pas de budget initial. ')+(ok(rn.evol_2025)?`Évolution sur 2025 : ${F.kd(rn.evol_2025)} (2025 : ${F.k(rn.a2025)}, exploitation à périmètre constant${AGSEL&&AGSEL.has('94 Vitry')?', Vitry absente en 2025':''}).`:'Pas de réel 2025.')+(ok(hv.y2026)?` En aide à domicile, de janvier à octobre, les heures vendues évoluent de <b>${F.rel(hv.evol_2025)}</b> sur un an (${F.rel(hv.ecart_budget)} par rapport à l’objectif) ; prix moyen ${F.eur(pr.y2026)} (${F.eurd(pr.evol_2025)}), coût horaire chargé ${F.eur(tc.y2026)} (${F.eurd(tc.evol_2025)}), perte sèche ${F.pct(psr.y2026)} des heures vendues.`:'');}
   else document.getElementById('synMsg').innerHTML=`<b>En résumé.</b> L'atterrissage 2026 prévoit un résultat net de <b>${F.k(rn.a2026)}</b>, soit <b>${F.kd(rn.ecart_budget)}</b> par rapport au budget (${F.k(rn.b2026)}), pour des produits de <b>${F.M(ca.a2026)}</b> (${F.Md(ca.evol_2025)} par rapport à 2025 à périmètre constant), une croissance portée par les SSIAD et l'intégration de Vitry. Ces résultats portent sur l’exploitation des entités présentes en 2026 : en 2025, le résultat comptable définitif (comptes arrêtés) s’établit à <b>${F.k(COMPTA.a2025.res)}</b>, une fois intégrés les agences sorties du périmètre (${F.k(COMPTA.a2025.sort)}) et les éléments hors exploitation et de clôture (${F.k(COMPTA.a2025.res-rn.a2025-COMPTA.a2025.sort)}). En aide à domicile, de janvier à octobre, les heures vendues reculent de <b>${F.rel(hv.evol_2025)}</b> sur un an à périmètre constant (${F.rel(hv.y2026/hv.y2025_yc-1)} y compris l’agence 80 cédée, ${F.rel(hv.ecart_budget)} par rapport à l'objectif) ; le prix moyen progresse de ${F.eurd(pr.evol_2025)} mais le coût horaire chargé de ${F.eurd(tc.evol_2025)}. La modulation positive atteint ${F.pct(mp.y2026)} des heures vendues (objectif ${F.pct(mp.budget2026)}) ; la perte sèche (modulation négative et heures perdues) recule à ${F.pct(psr.y2026)}.`+(()=>{const I=trInfo(),l=I.last,y1=+l.mois.slice(0,4)+1;return ` La trésorerie des comptes de dépôt atteint <b>${F.M(l.dep)}</b> à fin ${mL(l.mois)} (${nf1.format(l.dep/I.seuil)} mois de décaissements, ${F.M(l.tot)} placements compris) ; le plan prévoit ${F.M(I.g(y1+'-12').dep)} à fin ${y1}, au-dessus du seuil de vigilance de ${F.M(I.seuil)}.`;})();
-  const PC='<span class="pc">2025 à périmètre constant</span>',YC=t=>AGSEL?'':`<div class="r yc">Y compris agences cédées · ${t}</div>`;
+  const PC='<span class="pc">2025 à périmètre constant</span>',YC=t=>FILT()?'':`<div class="r yc">Y compris agences cédées · ${t}</div>`;
   document.getElementById('synK').innerHTML=
     kpi('Produits 2026 (atterrissage)',F.M(ca.a2026),`Budget ${F.M(ca.b2026)} · ${PC} : ${F.M(ca.a2025)}</div>`+YC(`2025 : ${F.M(ca.a2025+CEDEES25.prod)} (dont agences cédées ${F.M(CEDEES25.prod)})`)+'<div style="display:none">',dl(ca.ecart_budget,'kd',1,'vs budget'))+
-    kpi('Résultat net 2026 (atterrissage)',F.k(rn.a2026),`Budget ${F.k(rn.b2026)} · ${PC} : ${F.k(rn.a2025)}</div>`+YC(`2025 : ${F.k(rn.a2025+COMPTA.a2025.sort)} (exploitation) · résultat comptable définitif : ${F.k(COMPTA.a2025.res)} (2024 : ${F.k(COMPTA.a2024.res)})`)+'<div style="display:none">',dl(rn.ecart_budget,'kd',1,'vs budget')+(AGSEL?dl(rn.evol_2025,'kd',1,'vs 2025'):dl(rn.a2026-COMPTA.a2025.res,'kd',1,'vs 2025 comptable')))+
+    kpi('Résultat net 2026 (atterrissage)',F.k(rn.a2026),`Budget ${F.k(rn.b2026)} · ${PC} : ${F.k(rn.a2025)}</div>`+YC(`2025 : ${F.k(rn.a2025+COMPTA.a2025.sort)} (exploitation) · résultat comptable définitif : ${F.k(COMPTA.a2025.res)} (2024 : ${F.k(COMPTA.a2024.res)})`)+'<div style="display:none">',dl(rn.ecart_budget,'kd',1,'vs budget')+(FILT()?dl(rn.evol_2025,'kd',1,'vs 2025'):dl(rn.a2026-COMPTA.a2025.res,'kd',1,'vs 2025 comptable')))+
     (()=>{const I=trInfo(),l=I.last;return kpi('Trésorerie association · fin '+mL(l.mois),F.M(l.dep),`Comptes de dépôt · ${nf1.format(l.dep/I.seuil)} mois de décaissements · placements compris ${F.M(l.tot)} · prévision fin ${+l.mois.slice(0,4)+1} : ${F.M(I.g((+l.mois.slice(0,4)+1)+'-12').dep)}`,dl(l.dep-I.seuil,'Md',1,'vs seuil de vigilance'));})()+
-    kpi('Heures vendues aide · janv.–oct.',F.h(hv.y2026),`${PC} : ${F.h(hv.y2025)} · objectif ${F.h(hv.budget2026)}</div>`+YC(`2025 : ${F.h(hv.y2025_yc)}`)+'<div style="display:none">',dl(hv.evol_2025,'rel',1,'vs 2025')+dl(hv.ecart_budget,'rel',1,'vs objectif'))+
+    (ok(hv.y2026)?kpi('Heures vendues aide · janv.–oct.',F.h(hv.y2026),`${PC} : ${F.h(hv.y2025)} · objectif ${F.h(hv.budget2026)}</div>`+YC(`2025 : ${F.h(hv.y2025_yc)}`)+'<div style="display:none">',dl(hv.evol_2025,'rel',1,'vs 2025')+dl(hv.ecart_budget,'rel',1,'vs objectif'))+
     kpi('Prix de vente moyen · janv.–oct.',F.eur(pr.y2026),`${PC} : ${F.eur(pr.y2025)} · objectif ${F.eur(pr.budget2026)}</div>`+YC(`2025 : ${F.eur(pr.y2025_yc)}`)+'<div style="display:none">',dl(pr.ecart_budget,'eurd',1,'vs objectif'))+
     kpi('Taux horaire brut · janv.–oct.',F.eur(tb.y2026),`${PC} : ${F.eur(tb.y2025)} · objectif ${F.eur(tb.budget2026)}</div>`+YC(`2025 : ${F.eur(tb.y2025_yc)}`)+'<div style="display:none">',dl(tb.ecart_budget,'eurd',0,'vs objectif'))+
     kpi('Coût horaire chargé · janv.–oct.',F.eur(tc.y2026),`${PC} : ${F.eur(tc.y2025)} · 2024 : ${F.eur(tc.y2024)}</div>`+YC(`2025 : ${F.eur(tc.y2025_yc)}`)+'<div style="display:none">',dl(tc.evol_2025,'eurd',0,'vs 2025'))+
     kpi('Modulation + / h vendues',F.pct(mp.y2026),`Solde fin octobre : ${F.h(A('mp').y2026)} · objectif ${F.pct(mp.budget2026)} · ${PC} : ${F.pct(mp.y2025)}</div>`+YC(`2025 : ${F.pct(mp.y2025_yc)}`)+'<div style="display:none">',dl(mp.ecart_budget,'pt',0,'vs objectif'))+
-    kpi('Perte sèche (modulation − et h perdues)',F.h(ps.y2026),`${F.pct(psr.y2026)} des h vendues · ≈ ${F.k(pse.y2026)} · ${PC} : ${F.pct(psr.y2025)}</div>`+YC(`2025 : ${F.pct(psr.y2025_yc)}`)+'<div style="display:none">',dl(psr.evol_2025,'pt',0,'vs 2025'));
+    kpi('Perte sèche (modulation − et h perdues)',F.h(ps.y2026),`${F.pct(psr.y2026)} des h vendues · ≈ ${F.k(pse.y2026)} · ${PC} : ${F.pct(psr.y2025)}</div>`+YC(`2025 : ${F.pct(psr.y2025_yc)}`)+'<div style="display:none">',dl(psr.evol_2025,'pt',0,'vs 2025')):'');
 }
 const POLES=[['total','Total association'],['aide','Aide à domicile'],['soin','Soins (SSIAD)'],['mand','Mandataire'],['siege','Siège'],['vitry','dont Vitry (intégrée en 2026)']];
 function rAct(){
@@ -452,10 +455,10 @@ function rAct(){
   [['ca','Produits (prestations, dotations et subventions) — k€',1],['ch','Charges nettes (charges − autres produits de gestion, financiers et exceptionnels) — k€',0],['rn','Résultat net = produits − charges — k€',1]].forEach(([c,l,hi])=>{
     h+=`<tr class="grp"><td colspan="7">${l}</td></tr>`;
     POLES.forEach(([p,pl])=>{const r=ROW(p,c); if(!r.cle) return; const st=p==='total'?' style="font-weight:800"':p==='vitry'?' style="font-style:italic;color:var(--text-2)"':'';
-      h+=`<tr${st}><td>${p==='total'&&AGSEL?'Total sélection':pl}</td>`+cols.map(f=>`<td>${ok(r[f])?F.kn(r[f]):'–'}</td>`).join('')+
+      h+=`<tr${st}><td>${p==='total'&&FILT()?'Total sélection':pl}</td>`+cols.map(f=>`<td>${ok(r[f])?F.kn(r[f]):'–'}</td>`).join('')+
       ['ecart_budget','evol_2025'].map((f,i)=>`<td class="${i?'':'sep '}${ok(r[f])&&Math.abs(r[f])>=500?cls(r[f],hi):''}">${ok(r[f])?F.knd(r[f]):'–'}</td>`).join('')+'</tr>';});
   });
-  if(!AGSEL)h+=`<tr style="font-weight:800;border-top:2px solid var(--border)"><td>Résultat comptable définitif (y c. agences sorties et hors exploitation)</td><td class="neg">${F.kn(COMPTA.a2024.res)}</td><td class="neg">${F.kn(COMPTA.a2025.res)}</td><td>–</td><td>–</td><td class="sep">–</td><td>–</td></tr>`;
+  if(!FILT())h+=`<tr style="font-weight:800;border-top:2px solid var(--border)"><td>Résultat comptable définitif (y c. agences sorties et hors exploitation)</td><td class="neg">${F.kn(COMPTA.a2024.res)}</td><td class="neg">${F.kn(COMPTA.a2025.res)}</td><td>–</td><td>–</td><td class="sep">–</td><td>–</td></tr>`;
   document.getElementById('tAct').innerHTML=h+'</tbody></table>';
 }
 function rAide(){
@@ -469,18 +472,18 @@ function rAide(){
   document.getElementById('tAide').innerHTML=h+'</tbody></table>';
 }
 function rSig(){
-  const charge=new Set(['aad','cons','fisc','pers','acg','dot']), lab=POLES.find(p=>p[0]===POLE)[1];
-  document.getElementById('sigT').textContent='Soldes intermédiaires de gestion — '+(POLE==='total'&&AGSEL?'Total sélection':lab)+' (k€)';
+  const charge=new Set(['aad','cons','fisc','pers','acg','dot']), lab=FILT()?'Sélection : '+(POLE!=='total'?PLAB[POLE]:'')+(AGSEL?(POLE!=='total'?' · ':'')+[...AGSEL].join(', '):''):'Total association';
+  document.getElementById('sigT').textContent='Soldes intermédiaires de gestion — '+lab+' (k€)';
   document.getElementById('casT').textContent='Du chiffre d’affaires au résultat — atterrissage 2026 — '+lab+' (k€)';
   let h='<table><thead><tr><th>Solde</th><th>2024</th><th>2025</th><th>Budget 2026</th><th>Atterrissage 2026</th><th class="sep">Écart / budget</th><th>Évol. / 2025</th><th class="sep">% du CA 2026</th></tr></thead><tbody>';
-  const ca=S(POLE+'_ca').a2026;
-  CA.sig.filter(r=>r.pole_code===POLE).sort((a,b)=>a.ordre-b.ordre).forEach(r=>{const hv=r.code==='hv';
-    const c=r.type==='solde'?'sg':r.type==='detail'?'sub':''; h+=`<tr class="${c}"><td>${r.code==='rn'?(POLE==='total'?'Résultat net du périmètre 2026 (exploitation des entités présentes en 2026)':'Résultat net'):esc(r.ligne)}</td>`;
+  const ca=S('total_ca').a2026;
+  CA.sig.filter(r=>r.pole_code==='total').sort((a,b)=>a.ordre-b.ordre).forEach(r=>{const hv=r.code==='hv';
+    const c=r.type==='solde'?'sg':r.type==='detail'?'sub':''; h+=`<tr class="${c}"><td>${r.code==='rn'?(!FILT()?'Résultat net du périmètre 2026 (exploitation des entités présentes en 2026)':'Résultat net'):esc(r.ligne)}</td>`;
     h+=['a2024','a2025','b2026','a2026'].map(f=>`<td class="${r.type==='solde'&&ok(r[f])&&r[f]<0?'neg':''}">${!ok(r[f])?'–':hv?nf0.format(r[f]):F.kn(r[f])}</td>`).join('');
     h+=['ecart_budget','evol_2025'].map((f,i)=>{const v=r[f]; const k=hv||r.type==='detail'||!ok(v)||Math.abs(v)<500?'':((v>0)!==charge.has(r.code)?'up':'down');
       return `<td class="${i?'':'sep '}${k}">${!ok(v)?'–':hv?sg(v)+nf0.format(v):F.knd(v)}</td>`;}).join('');
     h+=`<td class="sep">${hv||!ok(r.a2026)||!ca?'':nf1.format(r.a2026/ca*100)+' %'}</td></tr>`;});
-  if(POLE==='total'&&!AGSEL){const rn=S('total_rn'),cell=(f,v)=>`<td>${COMPTA[f]?F.kn(v(f)):'–'}</td>`,tail='<td></td><td></td><td class="sep">–</td><td></td><td class="sep"></td></tr>';
+  if(!FILT()){const rn=S('total_rn'),cell=(f,v)=>`<td>${COMPTA[f]?F.kn(v(f)):'–'}</td>`,tail='<td></td><td></td><td class="sep">–</td><td></td><td class="sep"></td></tr>';
     const L=[['± Résultat des agences sorties du périmètre (59, 64 CSI, 76, 78, 80, 95)',f=>COMPTA[f].sort,'sub'],
       ['± Résultat hors exploitation et ajustements de clôture',f=>COMPTA[f].res-rn[f]-COMPTA[f].sort,'sub'],
       ['Résultat comptable définitif (états financiers)',f=>COMPTA[f].res,'sg']];
@@ -548,7 +551,7 @@ function gModul(){const el=document.getElementById('cModul');
     if(ok(r0.budget2026))E('line',{x1:x0-3,x2:x0+bw*.76+3,y1:Y(r0.budget2026),y2:Y(r0.budget2026),style:'stroke:var(--s2);stroke-width:2.5','stroke-dasharray':'6 4'},svg);
     txt(svg,x0+bw*.38,H-8,l);});
 }
-function gCascade(){const el=document.getElementById('cCas');const v=c=>{const r=S(POLE+'_'+c);return ok(r.a2026)?r.a2026:null;};
+function gCascade(){const el=document.getElementById('cCas');const v=c=>{const r=S('total_'+c);return ok(r.a2026)?r.a2026:null;};
   if(v('ca')===null){el.innerHTML='<div class="empty">Pas d’atterrissage 2026 pour cette activité</div>';return;}
   const st=[['ca','Chiffre d’affaires',1],['aad','Coût d’intervention',-1],['cons','Achats et services ext.',-1],['fisc','Impôts et taxes',-1],['pers','Autres personnels',-1],['apg','Autres produits',1],['acg','Autres charges',-1],['dot','Dotations',-1],['fin','Financier',1],['exc','Exceptionnel',1]];
   let c=0;const B=[];st.forEach(([k,l,s])=>{const a=v(k);if(a===null||Math.abs(a)<500)return;const d=s*a;B.push({l,a:c,b:c+d,d,first:k==='ca'});c+=d;});
@@ -573,7 +576,7 @@ function trInfo(){const T=CA.treso,R=T.filter(r=>r.statut==='Réalisé'),P=T.fil
   const under=T.filter(r=>r.dep<seuil);return {T,R,P,last,g,seuil,minP,minR,under};}
 function rTre(){const I=trInfo(),__=0,{last,g,seuil,minP,under}=I,y=last.mois.slice(0,4),d26=g(y+'-12'),d27=g((+y+1)+'-12'),d25=g((+y-1)+'-12');
   const cov=v=>nf1.format(v/seuil)+' mois';
-  document.getElementById('treMsg').innerHTML=(AGSEL?'<b>Trésorerie de l’association :</b> elle est suivie globalement et ne se filtre pas par agence. ':'')+`<b>En résumé.</b> À fin ${mL(last.mois)} (dernier mois réalisé), la trésorerie des comptes de dépôt s’élève à <b>${F.M(last.dep)}</b>, soit <b>${cov(last.dep)}</b> de décaissements, et à <b>${F.M(last.tot)}</b> placements compris. Le plan prévoit <b>${F.M(d26.dep)}</b> à fin ${y} puis <b>${F.M(d27.dep)}</b> à fin ${+y+1} (${F.Md(d27.dep-d26.dep)} sur l’année), avec un point bas prévisionnel de ${F.M(minP.dep)} en ${mL(minP.mois)}, au-dessus du seuil de vigilance de ${F.M(seuil)}.`+(under.length?` Sur la période, les comptes de dépôt sont passés sous ce seuil en ${under.map(r=>mL(r.mois)+' ('+F.M(r.dep)+(r.statut==='Réalisé'?', réalisé':', prévision')+')').join(', ')}.`:'');
+  document.getElementById('treMsg').innerHTML=(FILT()?'<b>Trésorerie de l’association :</b> elle est suivie globalement et ne se filtre pas par agence. ':'')+`<b>En résumé.</b> À fin ${mL(last.mois)} (dernier mois réalisé), la trésorerie des comptes de dépôt s’élève à <b>${F.M(last.dep)}</b>, soit <b>${cov(last.dep)}</b> de décaissements, et à <b>${F.M(last.tot)}</b> placements compris. Le plan prévoit <b>${F.M(d26.dep)}</b> à fin ${y} puis <b>${F.M(d27.dep)}</b> à fin ${+y+1} (${F.Md(d27.dep-d26.dep)} sur l’année), avec un point bas prévisionnel de ${F.M(minP.dep)} en ${mL(minP.mois)}, au-dessus du seuil de vigilance de ${F.M(seuil)}.`+(under.length?` Sur la période, les comptes de dépôt sont passés sous ce seuil en ${under.map(r=>mL(r.mois)+' ('+F.M(r.dep)+(r.statut==='Réalisé'?', réalisé':', prévision')+')').join(', ')}.`:'');
   document.getElementById('treK').innerHTML=
     kpi('Trésorerie fin '+mL(last.mois)+' · comptes de dépôt',F.M(last.dep),`Réalisé · ${cov(last.dep)} de décaissements`,dl(last.dep-d25.dep,'Md',1,'vs fin '+(+y-1)))+
     kpi('Trésorerie placements compris',F.M(last.tot),`Fin ${mL(last.mois)} · ${cov(last.tot)} de décaissements`)+
@@ -604,7 +607,7 @@ function gTre(){const el=document.getElementById('cTre'),I=trInfo(),T=I.T;
 }
 
 function rSoin(){const R=CA.ssiad.filter(r=>!AGSEL||AGSEL.has(ssAg(r.service))),P=S('soin_ca'),Rn=S('soin_rn'),box=document.getElementById('focusSoin');
-  box.style.display=R.length?'':'none';if(!R.length)return;
+  const showS=R.length&&polOK('soin');box.style.display=showS?'':'none';if(!showS)return;
   const pl=R.reduce((t,r)=>t+(r.places||0),0),po=R.filter(r=>r.places_occ&&r.places).reduce((t,r)=>[t[0]+r.places_occ,t[1]+(r.service.startsWith('SSIAD 05')?70:r.places)],[0,0]);
   document.getElementById('soinK').innerHTML=
     kpi('Services de soins 2026',String(R.length),AGSEL?'Dans la sélection':'Dont 3 nouveaux en 2026 : 13, 75 et Vitry')+
@@ -622,7 +625,7 @@ function rSoin(){const R=CA.ssiad.filter(r=>!AGSEL||AGSEL.has(ssAg(r.service))),
   const T=k=>R.reduce((t,r)=>t+(r[k]||0),0);
   h+=`<tr style="font-weight:800"><td>Total soin</td><td>${nf0.format(pl)}</td><td></td><td class="sep">${K(P.a2025)}</td><td>${K(P.b2026)}</td><td>${K(P.a2026)}</td><td class="sep">${K(Rn.a2025)}</td><td>${K(Rn.b2026)}</td><td>${K(Rn.a2026)}</td><td class="${cls(Rn.ecart_budget,1)}">${F.knd(Rn.ecart_budget)}</td><td>${nf1.format(Rn.a2026/P.a2026*100)} %</td></tr>`;
   document.getElementById('tSoin').innerHTML=h+'</tbody></table>';}
-function gSoin(){const el=document.getElementById('cSoin'),R=CA.ssiad.filter(r=>!AGSEL||AGSEL.has(ssAg(r.service)));if(!R.length)return;const SE=[['r25','Réel 2025','var(--s4)'],['rb','Budget 2026','var(--s2)'],['ra','Atterrissage 2026','var(--s1)']];
+function gSoin(){const el=document.getElementById('cSoin'),R=CA.ssiad.filter(r=>!AGSEL||AGSEL.has(ssAg(r.service)));if(!R.length||!polOK('soin'))return;const SE=[['r25','Réel 2025','var(--s4)'],['rb','Budget 2026','var(--s2)'],['ra','Atterrissage 2026','var(--s1)']];
   const all=R.flatMap(r=>SE.map(s=>r[s[0]]||0));const {svg,W,H,m,Y}=frame(el,280,Math.min(0,...all)*1.15,Math.max(...all)*1.12,t=>nf0.format(t/1000));
   E('line',{x1:m.l,x2:W-m.r,y1:Y(0),y2:Y(0),style:'stroke:var(--muted)'},svg);const bw=(W-m.l-m.r)/R.length;
   R.forEach((r,i)=>{const x0=m.l+bw*i+bw*.1,w=bw*.8/3,lab=r.service.replace('SSIAD ','').replace(/ \(.*\)| et ESA/,'');
@@ -658,21 +661,21 @@ function rComp(){
     let bg='';if(!isNet){const ref=refOf(I);let dev=I.k==='res'?Math.min(1,Math.abs(v)/150000):Math.min(1,Math.abs(v/ref-1)/(I.k==='real'?0.12:I.k==='traj'?0.35:0.1));
       const g=good(I,v,ref);bg=`background:color-mix(in srgb, ${g?'var(--good)':'var(--bad)'} ${Math.round(8+dev*38)}%, transparent)`;}
     return `<td style="${bg}">${I.f(v)}</td>`;};
-  R.forEach(a=>{h+=`<tr data-ag="${esc(a.agence)}" class="${SELAG===a.agence?'sel':''}"><td>${esc(a.agence)}</td>`+IND.map(I=>cell(I,a[I.k])).join('')+'</tr>';});
-  if(AGSEL){const g=agAgg(R);h+=`<tr class="net"><td>Sélection (${R.length} agence${R.length>1?'s':''}, moyenne pondérée)</td>`+IND.map(I=>cell(I,g[I.k],1)).join('')+'</tr>';}
+  const PA=polOK('aide');if(PA)R.forEach(a=>{h+=`<tr data-ag="${esc(a.agence)}" class="${SELAG===a.agence?'sel':''}"><td>${esc(a.agence)}</td>`+IND.map(I=>cell(I,a[I.k])).join('')+'</tr>';});
+  if(PA){if(AGSEL){const g=agAgg(R);h+=`<tr class="net"><td>Sélection (${R.length} agence${R.length>1?'s':''}, moyenne pondérée)</td>`+IND.map(I=>cell(I,g[I.k],1)).join('')+'</tr>';}
   h+=`<tr class="net${AGSEL?' obj':''}"><td>Réseau (moyenne pondérée)</td>`+IND.map(I=>cell(I,CA.agn[I.k],1)).join('')+'</tr>';
-  h+=`<tr class="net obj"><td>Objectif 2026</td><td>–</td><td>100,0 %</td><td>${nf2.format(CA.agn.obj_txb)} €</td><td>–</td><td>${nf1.format(CA.agn.obj_traj*100)} %</td><td>–</td></tr>`;
-  h+=`<tr class="grpm"><td colspan="7">Services de soins (SSIAD et ESA) · seul le résultat est comparable</td></tr>`;
+  h+=`<tr class="net obj"><td>Objectif 2026</td><td>–</td><td>100,0 %</td><td>${nf2.format(CA.agn.obj_txb)} €</td><td>–</td><td>${nf1.format(CA.agn.obj_traj*100)} %</td><td>–</td></tr>`;}
+  if(polOK('soin')){h+=`<tr class="grpm"><td colspan="7">Services de soins (SSIAD et ESA) · seul le résultat est comparable</td></tr>`;
   const RI=IND[0],sn=n=>n.replace(' et ESA',' + ESA');
   const SL=ssList();if(AGSEL&&!SL.length)h+=`<tr class="ss"><td colspan="7">Aucun SSIAD rattaché aux agences sélectionnées</td></tr>`;
   SL.slice().sort((x,y)=>y.ra-x.ra).forEach(r=>{h+=`<tr class="ss"><td>${esc(sn(r.service))}</td>`+cell(RI,r.ra)+'<td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>';});
-  const st=S('soin_rn');if(AGSEL&&SL.length)h+=`<tr class="net"><td>Sélection soin (${SL.length} service${SL.length>1?'s':''})</td><td>${F.kn(SL.reduce((t,r)=>t+r.ra,0))}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>`;
-  h+=`<tr class="net${AGSEL?' obj':''}"><td>Total soin</td><td>${F.kn(st.a2026)}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>`;
+  const st=CA.sigNet.find(r=>r.cle==='soin_rn')||{};if(AGSEL&&SL.length)h+=`<tr class="net"><td>Sélection soin (${SL.length} service${SL.length>1?'s':''})</td><td>${F.kn(SL.reduce((t,r)=>t+r.ra,0))}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>`;
+  h+=`<tr class="net${AGSEL?' obj':''}"><td>Total soin</td><td>${F.kn(st.a2026)}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>`;}
   const dash5='<td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>';
   h+=`<tr class="grpm"><td colspan="7">Autres activités et total</td></tr>`;
-  h+=`<tr class="ss"><td>Mandataire (13, 16, 64)</td>${cell(RI,S('mand_rn').a2026)}${dash5}</tr>`;
-  h+=`<tr class="ss"><td>Siège (après refacturation des frais de siège)</td>${cell(RI,S('siege_rn').a2026)}${dash5}</tr>`;
-  const tg=S('total_rn');h+=`<tr class="net tot"><td>Total général association</td><td class="${tg.a2026<0?'neg':''}">${F.kn(tg.a2026)}</td>${dash5}</tr>`;
+  if(polOK('mand')&&ok(S('mand_rn').a2026))h+=`<tr class="ss"><td>Mandataire${AGSEL?'':' (13, 16, 64)'}</td>${cell(IND[0],S('mand_rn').a2026)}${dash5}</tr>`;
+  if(polOK('siege')&&ok(S('siege_rn').a2026))h+=`<tr class="ss"><td>Siège (après refacturation des frais de siège)</td>${cell(IND[0],S('siege_rn').a2026)}${dash5}</tr>`;
+  const tg=S('total_rn');h+=`<tr class="net tot"><td>${FILT()?'Total de la sélection':'Total général association'}</td><td class="${tg.a2026<0?'neg':''}">${F.kn(tg.a2026)}</td>${dash5}</tr>`;
   document.getElementById('tComp').innerHTML=h+'</tbody></table>';
   document.querySelectorAll('#tComp tr[data-ag]').forEach(tr=>tr.addEventListener('click',()=>{SELAG=SELAG===tr.dataset.ag?null:tr.dataset.ag;rComp();gComp();}));
   const sel=document.getElementById('compSel');sel.textContent=(AGSEL?'Les lignes Réseau des graphiques restent celles du réseau complet. ':'')+(SELAG?('Agence mise en évidence : '+SELAG+' (cliquez à nouveau pour annuler)'):'Cliquez sur une agence pour la mettre en évidence ; choisissez des agences dans la barre de filtres pour restreindre la comparaison.');
@@ -725,7 +728,9 @@ function gSoinRes(){const el=document.getElementById('cSoinRes');const short=n=>
     txt(svg,x+w/2,r.ra>=0?Y(r.ra)-5:Y(r.ra)+14,nf0.format(Math.round(r.ra/1000)||0),{style:'fill:var(--text);font-size:11px;font-weight:700'});
     txt(svg,x+w/2,H-8,short(r.service),{style:'fill:var(--text-2);font-size:'+(bw<60?'10px':'11px')});});
   const tot=S('soin_rn');document.getElementById('soinResTot').innerHTML=`Total soin : <b>${F.k(tot.a2026)}</b> en atterrissage 2026 (budget ${F.k(tot.b2026)}, 2025 ${F.k(tot.a2025)}).`;}
-function gComp(){IND.forEach(I=>gBar(document.getElementById('cB_'+I.k),I));gPos();gSoinRes();}
+function gComp(){const PA=polOK('aide'),PS=polOK('soin');
+  document.querySelectorAll('#p-comp .grid2, #p-comp .card').forEach(c=>{if(c.querySelector('#cPos')||c.querySelector('#cB_res'))c.style.display=PA?'':'none';if(c.querySelector('#cSoinRes'))c.style.display=PS?'':'none';});
+  if(PA){IND.forEach(I=>gBar(document.getElementById('cB_'+I.k),I));gPos();}if(PS)gSoinRes();}
 
 /* ---------- Filtre « Agences » appliqué à tous les onglets : recalcul à partir des données par entité ---------- */
 const SIGL=[['hv','Heures vendues','info'],['ca',"Chiffre d'affaires (prestations, dotations et subventions)",'solde'],['prest','dont prestations et dotations','detail'],
@@ -741,7 +746,7 @@ const inSel=ag=>!AGSEL||AGSEL.has(ag);
 function sigLines(z){if(!z)return null;const ca=z.ca+z.subv,mc=ca-z.aad,va=mc-z.cons,ebe=va-z.fisc-z.pers_aut,rex=ebe+z.apg-z.acg-z.dot,rc=rex+z.pfin-z.cfin,rn=rc+z.pexc-z.cexc+z.rec;
   return {hv:z.hv,ca,prest:z.ca,subv:z.subv,aad:z.aad,mc,cons:z.cons,va,fisc:z.fisc,pers:z.pers_aut,ebe,apg:z.apg,acg:z.acg,dot:z.dot,rex,fin:z.pfin-z.cfin,rc,exc:z.pexc-z.cexc,rec:z.rec,rn};}
 function buildSig(){const G={};
-  RAW.ents.filter(e=>inSel(e.ag)).forEach(e=>{const gs=['total',e.pole].concat(e.vitry?['vitry']:[]);
+  RAW.ents.filter(e=>(POLE==='siege'?e.ag==='Siège':inSel(e.ag))&&polOK(e.pole)).forEach(e=>{const gs=['total',e.pole].concat(e.vitry?['vitry']:[]);
     gs.forEach(g=>{const o=G[g]=G[g]||{};YRS.forEach(([c,k])=>{const v=e.y[k];if(!v)return;if(!o[c]){o[c]={};for(const x in v)o[c][x]=0;}for(const x in v)o[c][x]+=v[x];});});});
   const rows=[];['total','aide','soin','mand','siege','vitry'].forEach(g=>{if(!G[g])return;const L={};YRS.forEach(([c])=>L[c]=sigLines(G[g][c]));
     SIGL.forEach(([k,l,t],i)=>{if(k==='hv'&&['soin','mand','siege'].includes(g))return;const v={};YRS.forEach(([c])=>v[c]=L[c]?Math.round(L[c][k]):null);
@@ -752,28 +757,32 @@ const IND_A=[['hv','Heures vendues','h',1],['ca',"Chiffre d'affaires",'€',1],[
  ['mp','Modulation positive (solde fin de période)','h',0],['mpr','Modulation positive / h vendues','%',0],['mn','Modulation négative (solde fin de période)','h',0],['mnr','Modulation négative / h vendues','%',0],
  ['hl','Heures perdues (cumul depuis janvier)','h',0],['hlr','Heures perdues / h vendues','%',0],['ps','Perte sèche : modulation négative + heures perdues','h',0],['psr','Perte sèche / h vendues','%',0],['pse','Perte sèche valorisée au coût horaire chargé','€',0]];
 const dv=(a,b)=>b?a/b:null;
-function buildAide(){const Z={};const sum=y=>{const z={hv:0,ca:0,hp:0,br:0,ch:0,mp:0,mn:0,hl:0,hvY:0};for(const ag in RAW.act){if(!inSel(ag))continue;const o=RAW.act[ag][y];if(o)for(const k in z)z[k]+=o[k]||0;}return z;};
+function buildAide(){const Z={};const sum=y=>{const z={hv:0,ca:0,hp:0,br:0,ch:0,mp:0,mn:0,hl:0,hvY:0};for(const ag in RAW.act){if(!inSel(ag)||!polOK('aide'))continue;const o=RAW.act[ag][y];if(o)for(const k in z)z[k]+=o[k]||0;}return z;};
   [2024,2025,2026].forEach(y=>{const z=sum(y),ch=dv(z.br+z.ch,z.hp),has=z.hv>0||z.hvY>0;
     Z[y]=has?{hv:z.hv,ca:z.ca,prix:dv(z.ca,z.hv),txb:dv(z.br,z.hp),txc:ch,prod:dv(z.hv,z.hp),mp:z.mp,mpr:dv(z.mp,z.hvY),mn:z.mn,mnr:dv(z.mn,z.hvY),hl:z.hl,hlr:dv(z.hl,z.hvY),ps:z.mn+z.hl,psr:dv(z.mn+z.hl,z.hvY),pse:ch===null?null:(z.mn+z.hl)*ch}:{};Z[y].hvY=z.hvY;});
-  const ob={hv:0,ca:0,wt:0,wtd:0,wp:0,wn:0,wd:0};for(const ag in RAW.bud){if(!inSel(ag))continue;for(const k in ob)ob[k]+=RAW.bud[ag][k];}
+  const ob={hv:0,ca:0,wt:0,wtd:0,wp:0,wn:0,wd:0};for(const ag in RAW.bud){if(!inSel(ag)||!polOK('aide'))continue;for(const k in ob)ob[k]+=RAW.bud[ag][k];}
   const B=ob.hv?{hv:ob.hv,ca:ob.ca,prix:dv(ob.ca,ob.hv),txb:dv(ob.wt,ob.wtd),mpr:dv(ob.wp,ob.wd),mnr:dv(ob.wn,ob.wd)}:{};
   if(ok(B.mpr))B.mp=B.mpr*Z[2026].hvY;if(ok(B.mnr))B.mn=B.mnr*Z[2026].hvY;
   return IND_A.map(([k,l,u,hi],i)=>{const a=Z[2024][k],b=Z[2025][k],c=Z[2026][k],o=B[k],rel=u==='h'||u==='€';
     const ev=(x,y)=>!ok(x)||!ok(y)||(rel&&!y)?null:(rel?x/y-1:x-y);
     const r={cle:k,ordre:i+1,indicateur:l,unite:u,plus_haut_mieux:hi,y2024:ok(a)?a:null,y2025:ok(b)?b:null,y2026:ok(c)?c:null,budget2026:ok(o)?o:null,evol_2025:ev(c,b),evol_2024:ev(c,a),ecart_budget:ev(c,o),ecart_type:rel?'rel':(u==='%'?'pt':'eur')};
-    if(!AGSEL&&AIDE_YC[k]){r.y2024_yc=AIDE_YC[k][0];r.y2025_yc=AIDE_YC[k][1];}return r;});}
+    if(!FILT()&&AIDE_YC[k]){r.y2024_yc=AIDE_YC[k][0];r.y2025_yc=AIDE_YC[k][1];}return r;});}
 function buildMois(){const L=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-  return L.map((l,i)=>{const r={mois:i+1,libelle:l};['2024','2025','2026','bud'].forEach(y=>{let t=0,any=false;for(const ag in RAW.mois){if(!inSel(ag))continue;const v=RAW.mois[ag][y];if(v){t+=v[i];any=true;}}
+  return L.map((l,i)=>{const r={mois:i+1,libelle:l};['2024','2025','2026','bud'].forEach(y=>{let t=0,any=false;for(const ag in RAW.mois){if(!inSel(ag)||!polOK('aide'))continue;const v=RAW.mois[ag][y];if(v){t+=v[i];any=true;}}
     const key=y==='bud'?'budget2026':'hv'+y;r[key]=y==='2026'&&!RAW.ms.includes(i+1)?null:(any?t:null);});return r;});}
-function applyFilter(){CA.sig=buildSig();CA.aide=buildAide();CA.mois=buildMois();
-  const fl=document.getElementById('filtreInfo');if(fl)fl.innerHTML=AGSEL?`<b>Filtre actif :</b> ${[...AGSEL].sort((x,y)=>x.localeCompare(y,'fr',{numeric:true})).join(', ')} · tous les onglets portent sur cette sélection (hors trésorerie, suivie au niveau de l’association) · le siège et les éléments propres à l’association (résultat comptable, agences cédées) ne s’affichent qu’avec « Toutes ».`:'';
-  if(fl)fl.style.display=AGSEL?'block':'none';}
+function applyFilter(){if(!CA.sigNet){const a=AGSEL,p=POLE;AGSEL=null;POLE='total';CA.sigNet=buildSig();AGSEL=a;POLE=p;}CA.sig=buildSig();CA.aide=buildAide();CA.mois=buildMois();
+  const fl=document.getElementById('filtreInfo');if(fl)fl.innerHTML=FILT()?`<b>Filtre actif :</b> ${POLE!=='total'?PLAB[POLE]+(AGSEL?' · ':''):''}${AGSEL?[...AGSEL].sort((x,y)=>x.localeCompare(y,'fr',{numeric:true})).join(', '):''} · tous les onglets portent sur cette sélection (hors trésorerie, suivie au niveau de l’association) · le siège et les éléments propres à l’association (résultat comptable, agences cédées) ne s’affichent qu’avec « Toutes ».`:'';
+  if(fl)fl.style.display=FILT()?'block':'none';}
 
+function showAide(){const okA=CA.aide[0]&&ok(CA.aide[0].y2026);const sec=document.getElementById('p-aide');
+  [...sec.children].forEach(c=>{if(c.id==='focusSoin'||c.classList.contains('ptitle')||c.id==='aideVide')return;c.style.display=okA?'':'none';});
+  let m=document.getElementById('aideVide');if(!m){m=document.createElement('div');m.id='aideVide';m.className='ctx';m.style.cssText='border:1px solid var(--border);border-radius:10px;margin-bottom:14px';sec.insertBefore(m,document.getElementById('focusSoin'));}
+  m.style.display=okA?'none':'';m.textContent='Pas d’activité d’aide à domicile dans la sélection : les indicateurs d’heures, de prix, de taux horaires et de modulation ne s’appliquent pas.';return okA;}
 function render(){CA.ag=CA_AG.ag;CA.agn=CA_AG.net;rSoin();rComp();rSyn();rAct();rAide();rSig();rTre();const t=document.querySelector('.panel.on').id;
-  if(t==='p-syn'){gProduits();gResultat();} if(t==='p-aide'){gMois();gModul();gSoin();} if(t==='p-sig')gCascade(); if(t==='p-tre')gTre(); if(t==='p-comp')gComp();}
+  if(t==='p-syn'){gProduits();gResultat();} if(t==='p-aide'){if(showAide()){gMois();gModul();}gSoin();} if(t==='p-sig')gCascade(); if(t==='p-tre')gTre(); if(t==='p-comp')gComp();}
 function setTab(t){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));render();}
 document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>{setTab(b.dataset.t);history.replaceState(null,'','#'+b.dataset.t);}));
-document.querySelectorAll('#fPole .chip').forEach(c=>c.addEventListener('click',()=>{POLE=c.dataset.p;document.querySelectorAll('#fPole .chip').forEach(x=>x.classList.toggle('on',x===c));if(!document.getElementById('p-sig').classList.contains('on'))setTab('sig');else render();}));
+document.querySelectorAll('#fPole .chip').forEach(c=>c.addEventListener('click',()=>{POLE=c.dataset.p;document.querySelectorAll('#fPole .chip').forEach(x=>x.classList.toggle('on',x===c));applyFilter();render();}));
 document.getElementById('theme').addEventListener('click',()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark';render();});
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(render,150);});
 applyFilter();
